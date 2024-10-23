@@ -44,14 +44,13 @@ public class ServerWindow extends JFrame{
         setResizable(false);
         setTitle("chatServer");
         setAlwaysOnTop(true);
-        setLayout(new FlowLayout(FlowLayout.LEFT));
-        add(btnStart);
-        add(btnStop);
+        setLayout(new GridLayout(1,3));
         log.setLineWrap(true);
         log.setWrapStyleWord(true);
-        log.setSize(WIDTH - 30, HEIGHT);
+        log.setFont(new Font("Dialog", Font.PLAIN, 25));
         add(log);
-
+        add(btnStart);
+        add(btnStop);
 
         setVisible(true);
     }

@@ -14,7 +14,8 @@ public class ClientGUI extends JFrame{
     private static final int HEIGHT = 300;
     private static final String SPASE = " ";
     private static final String COLON = ":";
-    private static final String SERVER_ERROR = "Server wasn't started";
+    private static final String EMPTY_STR = "";
+    private static final String SERVER_ERROR = "Server wasn't started. Start server first";
     private static final String LOGIN_SUCCESS = "login successfully";
 
     private static String login = "login";
@@ -36,7 +37,8 @@ public class ClientGUI extends JFrame{
     private final JTextField tfMessage = new JTextField();
     private final JButton btnSend = new JButton("Send");
 
-    private final JTextField tfChat = new JTextField();
+    private final JPanel panelCenter = new JPanel(new BorderLayout());
+    private final JTextArea tfChat = new JTextArea();
 
     private ServerWindow server;
 
@@ -56,17 +58,19 @@ public class ClientGUI extends JFrame{
         panelTop.add(btnLogin);
         add(panelTop, BorderLayout.NORTH);
 
+        tfChat.setEditable(false);
         JScrollPane scrollChat = new JScrollPane(tfChat);
-        add(scrollChat, BorderLayout.CENTER);
+        panelCenter.add(scrollChat);
+        add(panelCenter, BorderLayout.CENTER);
 
         panelBottom.add(tfMessage, BorderLayout.CENTER);
         btnSend.setEnabled(false);
         panelBottom.add(btnSend, BorderLayout.EAST);
         add(panelBottom, BorderLayout.SOUTH);
 
-        log.setEditable(false);
-        JScrollPane scrollLog = new JScrollPane(log);
-        add(scrollLog);
+        //log.setEditable(false);
+        //JScrollPane scrollLog = new JScrollPane(log);
+        //add(scrollLog);
 
         setVisible(true);
     }
@@ -113,6 +117,7 @@ public class ClientGUI extends JFrame{
                 message = tfMessage.getText();
                 showMessage(message);
                 sendLogToServer(message);
+                tfMessage.setText(EMPTY_STR);
             }
         });
     }

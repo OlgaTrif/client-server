@@ -23,13 +23,12 @@ public class ServerWindow extends JFrame{
     }
 
     public ServerWindow(){
-        isServerWorking = true;
+        isServerWorking = false;
         btnStop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = false;
                 setTextLog("Server was stopped \n");
-                //System.out.println("Server was stopped " + isServerWorking + "\n");
             }
         });
         btnStart.addActionListener(new ActionListener() {
@@ -37,7 +36,6 @@ public class ServerWindow extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = true;
                 setTextLog("Server was started \n");
-                //System.out.println("Server was started " + isServerWorking + "\n");
             }
         });
 
@@ -62,7 +60,7 @@ public class ServerWindow extends JFrame{
     }
 
     public void setTextLog(String text){
-        log.setText(log.getText() + text);
+        log.setText(log.getText() + text + "\n");
     }
 
     public boolean getServerStatus(){

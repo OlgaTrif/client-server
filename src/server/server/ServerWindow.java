@@ -13,6 +13,8 @@ public class ServerWindow extends JFrame{
 
     private final JButton btnStart = new JButton("Start");
     private final JButton btnStop = new JButton("Stop");
+
+    private final JPanel panelBottom = new JPanel(new BorderLayout());
     private static final JTextArea log = new JTextArea();
     private boolean isServerWorking;
 
@@ -26,7 +28,7 @@ public class ServerWindow extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = false;
-                setTextLogAndShowText("Server was stopped " + isServerWorking);
+                setTextLog("Server was stopped \n");
                 //System.out.println("Server was stopped " + isServerWorking + "\n");
             }
         });
@@ -34,7 +36,7 @@ public class ServerWindow extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = true;
-                setTextLogAndShowText("Server was started " + isServerWorking);
+                setTextLog("Server was started \n");
                 //System.out.println("Server was started " + isServerWorking + "\n");
             }
         });
@@ -43,19 +45,27 @@ public class ServerWindow extends JFrame{
         setBounds(POS_X, POS_Y, WIDTH, HEIGHT);
         setResizable(false);
         setTitle("chatServer");
-        setAlwaysOnTop(true);
-        setLayout(new GridLayout(1,3));
+
         log.setLineWrap(true);
-        log.setWrapStyleWord(true);
-        log.setFont(new Font("Dialog", Font.PLAIN, 25));
-        add(log);
-        add(btnStart);
-        add(btnStop);
+        log.setEditable(false);
+        log.setSize(WIDTH - 100, HEIGHT - 100);
+        JScrollPane scrollLog = new JScrollPane(log);
+        add(scrollLog);
+        //panelTop.add(log, BorderLayout.CENTER);
+        //add(panelTop, BorderLayout.NORTH);
+
+        panelBottom.add(btnStart, BorderLayout.EAST);
+        panelBottom.add(btnStop, BorderLayout.WEST);
+        add(panelBottom, BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
-    public void setTextLogAndShowText(String text){
-        log.setText(text);
+    public void setTextLog(String text){
+        log.setText(log.getText() + text);
+    }
+
+    public boolean getServerStatus(){
+        return isServerWorking;
     }
 }

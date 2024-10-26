@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
 
 public class ServerWindow extends JFrame{
     private static final int POS_X = 500;
@@ -46,11 +48,8 @@ public class ServerWindow extends JFrame{
 
         log.setLineWrap(true);
         log.setEditable(false);
-        log.setSize(WIDTH - 100, HEIGHT - 100);
         JScrollPane scrollLog = new JScrollPane(log);
         add(scrollLog);
-        //panelTop.add(log, BorderLayout.CENTER);
-        //add(panelTop, BorderLayout.NORTH);
 
         panelBottom.add(btnStart, BorderLayout.EAST);
         panelBottom.add(btnStop, BorderLayout.WEST);
@@ -65,5 +64,9 @@ public class ServerWindow extends JFrame{
 
     public boolean getServerStatus(){
         return isServerWorking;
+    }
+
+    public String getLogInfo(){
+        return log.getText();
     }
 }

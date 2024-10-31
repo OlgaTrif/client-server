@@ -65,6 +65,7 @@ public class ServerWindow extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = false;
                 setTextLog(SERVER_STOPPED + NEW_STR);
+                saveInLog(SERVER_STOPPED + NEW_STR);
             }
         });
         btnStart.addActionListener(new ActionListener() {
@@ -72,6 +73,7 @@ public class ServerWindow extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 isServerWorking = true;
                 setTextLog(SERVER_STARTED + NEW_STR);
+                saveInLog(SERVER_STOPPED + NEW_STR);
             }
         });
     }

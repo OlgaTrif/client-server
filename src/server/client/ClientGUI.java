@@ -90,7 +90,7 @@ public class ClientGUI extends JFrame{
 
     private void sendLogToServer(String mes){
         String result = login + COLON + SPASE + mes + NEW_STR;
-        server.setTextLog(result);
+        server.message(result);
         tfChat.setText(server.getLogInfo());
     }
 
@@ -111,7 +111,7 @@ public class ClientGUI extends JFrame{
     }
 
     public void answer(String text) {
-        sendLogToServer(text);
+        server.setTextLog(text);
     }
 
     private void sendMessage(){

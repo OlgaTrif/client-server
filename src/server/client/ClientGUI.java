@@ -129,6 +129,9 @@ public class ClientGUI extends JFrame{
             panelTop.setVisible(false);
             connected = true;
             String log = server.getLog();
+            if (EMPTY_STR.equals(log)) {
+                tfChat.setText(log);
+            }
         } else {
             sendLogToServer(SERVER_ERROR);
         }

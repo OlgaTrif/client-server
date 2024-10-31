@@ -6,22 +6,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
+
+import static server.Constants.*;
 
 public class ClientGUI extends JFrame{
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
-    private static final String SPASE = " ";
-    private static final String COLON = ":";
-    private static final String EMPTY_STR = "";
     private static final String SERVER_ERROR = "Server wasn't started. Start server first";
     private static final String LOGIN_SUCCESS = "login successfully";
-    private static final String FILE_NAME = "logMessage.txt";
+    private static final String SERVER_DISCONNECT = "Disconnected from server";
 
     private static String login = "login";
     private static String ipAdress = "ipadress";
@@ -44,6 +39,7 @@ public class ClientGUI extends JFrame{
     private final JTextArea tfChat = new JTextArea();
 
     private ServerWindow server;
+    private boolean connected;
 
     public ClientGUI(ServerWindow serverWindow) {
         server = serverWindow;
@@ -53,6 +49,25 @@ public class ClientGUI extends JFrame{
         setSize(WIDTH, HEIGHT);
         setTitle("Chat Client");
 
+        createPanel();
+
+        setVisible(true);
+    }
+
+    private void setIPInfo(){
+        try {
+            final DatagramSocket socket = new DatagramSocket();
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            ipAdress = socket.getLocalAddress().toString();
+            port = String.valueOf(socket.getPort());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        tfIPAdress.setText(ipAdress);
+        tfPort.setText(port);
+    }
+
+    private void createPanel(){
         setIPInfo();
         panelTop.add(tfIPAdress);
         panelTop.add(tfPort);
@@ -71,25 +86,10 @@ public class ClientGUI extends JFrame{
         btnSend.setEnabled(false);
         panelBottom.add(btnSend, BorderLayout.EAST);
         add(panelBottom, BorderLayout.SOUTH);
-
-        setVisible(true);
-    }
-
-    private void setIPInfo(){
-        try {
-            final DatagramSocket socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            ipAdress = socket.getLocalAddress().toString();
-            port = String.valueOf(socket.getPort());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        tfIPAdress.setText(ipAdress);
-        tfPort.setText(port);
     }
 
     private void sendLogToServer(String mes){
-        String result = login + COLON + SPASE + mes + "\n";
+        String result = login + COLON + SPASE + mes + NEW_STR;
         server.setTextLog(result);
         tfChat.setText(server.getLogInfo());
     }
@@ -98,24 +98,48 @@ public class ClientGUI extends JFrame{
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (server.getServerStatus()) {
-                    login = tfLogin.getText();
-                    sendLogToServer(LOGIN_SUCCESS);
-                    btnSend.setEnabled(true);
-                    btnLogin.setEnabled(false);
-                } else {
-                    sendLogToServer(SERVER_ERROR);
-                }
+                connectToServer();
             }
         });
 
         btnSend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                message = tfMessage.getText();
-                sendLogToServer(message);
-                tfMessage.setText(EMPTY_STR);
+                sendMessage();
             }
         });
+    }
+
+    public void answer(String text) {
+        sendLogToServer(text);
+    }
+
+    private void sendMessage(){
+        message = tfMessage.getText();
+        sendLogToServer(message);
+        tfMessage.setText(EMPTY_STR);
+    }
+
+    private void connectToServer() {
+        if (server.connectUser(this)){
+            login = tfLogin.getText();
+            sendLogToServer(LOGIN_SUCCESS);
+            btnSend.setEnabled(true);
+            btnLogin.setEnabled(false);
+            panelTop.setVisible(false);
+            connected = true;
+            String log = server.getLog();
+        } else {
+            sendLogToServer(SERVER_ERROR);
+        }
+    }
+
+    public void disconnectFromServer() {
+        if (connected) {
+            panelTop.setVisible(true);
+            connected = false;
+            server.disconnectUser(this);
+            sendLogToServer(SERVER_DISCONNECT);
+        }
     }
 }

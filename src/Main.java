@@ -1,5 +1,5 @@
-import server.client.ClientGUI;
-import server.server.ServerWindow;
+import server.client.ui.ClientGUI;
+import server.server.ui.ServerWindow;
 
 public class Main {
     public static void main(String[] args) {

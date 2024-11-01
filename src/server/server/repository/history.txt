@@ -1,0 +1,5 @@
+log1: hi
+log2: hello
+log1: hey. How r y
+log2: ou. hi. i m there
+log2: i m okay

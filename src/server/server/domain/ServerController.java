@@ -4,14 +4,25 @@ import server.client.domain.ClientController;
 import server.server.repository.Repository;
 import server.server.ui.ServerView;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import static server.Constants.NEW_STR;
 
 public class ServerController {
     private boolean work;
     private ServerView serverView;
     private List<ClientController> clientControllerList;
     private Repository<String> repository;
+
+    public static final String SERVER_STARTED = "Server was started";
+    public static final String SERVER_START_ERROR = "Server is already working";
+    public static final String SERVER_STOPPED = "Server was stopped";
+    public static final String SERVER_STOP_ERROR = "Server is already stopped";
+    public static final String USER_LOGOUT = "%s logout";
+    public static final String USER_LOGIN= "%s login";
 
     public ServerController(ServerView serverView, Repository<String> repository) {
         this.serverView = serverView;
@@ -22,22 +33,22 @@ public class ServerController {
 
     public void start(){
         if (work){
-            showOnWindow("Сервер уже был запущен");
+            showOnWindow(SERVER_START_ERROR);
         } else {
             work = true;
-            showOnWindow("Сервер запущен!");
+            showOnWindow(SERVER_STARTED);
         }
     }
 
     public void stop(){
         if (!work){
-            showOnWindow("Сервер уже был остановлен");
+            showOnWindow(SERVER_STOP_ERROR);
         } else {
             work = false;
             while (!clientControllerList.isEmpty()){
                 disconnectUser(clientControllerList.get(clientControllerList.size() - 1));
             }
-            showOnWindow("Сервер остановлен!");
+            showOnWindow(SERVER_STOPPED);
         }
     }
 
@@ -45,7 +56,7 @@ public class ServerController {
         clientControllerList.remove(clientController);
         if (clientController != null){
             clientController.disconnectedFromServer();
-            showOnWindow(clientController.getName() + " отключился от беседы");
+            showOnWindow(String.format(USER_LOGOUT, clientController.getName()));
         }
     }
 
@@ -54,7 +65,7 @@ public class ServerController {
             return false;
         }
         clientControllerList.add(clientController);
-        showOnWindow(clientController.getName() + " подключился к беседе");
+        showOnWindow(String.format(USER_LOGIN, clientController.getName()));
         return true;
     }
 
@@ -78,7 +89,7 @@ public class ServerController {
     }
 
     private void showOnWindow(String text){
-        serverView.showMessage(text + "\n");
+        serverView.showMessage(text + NEW_STR);
     }
 
     private void saveInHistory(String text){

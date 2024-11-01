@@ -1,33 +1,27 @@
 package server.client.ui;
 
+import server.Constants;
+import server.client.domain.ClientController;
 import server.server.ui.ServerWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import static server.Constants.*;
 
-public class ClientGUI extends JFrame{
-    private static final int WIDTH = 400;
-    private static final int HEIGHT = 300;
-    private static final String SERVER_ERROR = "Server wasn't started. Start server first";
-    private static final String LOGIN_SUCCESS = "login successfully";
-    private static final String SERVER_DISCONNECT = "Disconnected from server";
-
-    private static String login = "login";
+public class ClientGUI extends JFrame implements ClientView {
+    private static String login_name = "login";
     private static String ipAdress = "ipadress";
     private static String port = "port";
     private static String password = "pass";
-    private static String message = "message";
 
     private final JPanel panelTop = new JPanel();
     private final JTextField tfIPAdress = new JTextField(ipAdress);
     private final JTextField tfPort = new JTextField(port);
-    private final JTextField tfLogin = new JTextField(login);
+    private final JTextField tfLogin = new JTextField(login_name);
     private final JPasswordField tfPassword = new JPasswordField(password);
     private final JButton btnLogin = new JButton("Login");
 
@@ -38,37 +32,46 @@ public class ClientGUI extends JFrame{
     private final JPanel panelCenter = new JPanel(new BorderLayout());
     private final JTextArea tfChat = new JTextArea();
 
-    private ServerWindow server;
-    private boolean connected;
+    private ClientController clientController;
 
-    public ClientGUI(ServerWindow serverWindow) {
-        server = serverWindow;
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setSize(WIDTH, HEIGHT);
-        setTitle("Chat Client");
-
+    public ClientGUI() {
+        setting();
         createPanel();
 
         setVisible(true);
     }
 
-    private void setIPInfo(){
-        try {
-            final DatagramSocket socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            ipAdress = socket.getLocalAddress().toString();
-            port = String.valueOf(socket.getPort());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        tfIPAdress.setText(ipAdress);
-        tfPort.setText(port);
+    @Override
+    public void showMessage(String message) {
+        tfChat.append(message);
+    }
+
+    @Override
+    public void disconnectedFromServer() {
+        hidePanelTop(true);
+    }
+
+    @Override
+    public void setClientController(ClientController clientController) {
+        this.clientController = clientController;
+    }
+
+    private void setting() {
+        setSize(Constants.WIDTH, Constants.HEIGHT);
+        setResizable(false);
+        setTitle("Chat client");
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
     private void createPanel(){
         setIPInfo();
+        createTopper();
+        createMiddle();
+        createBottom();
+    }
+
+
+    private void createTopper(){
         panelTop.add(tfIPAdress);
         panelTop.add(tfPort);
         panelTop.add(tfLogin);
@@ -76,22 +79,32 @@ public class ClientGUI extends JFrame{
         setBtnSettings();
         panelTop.add(btnLogin);
         add(panelTop, BorderLayout.NORTH);
+    }
 
+    private void createMiddle(){
         tfChat.setEditable(false);
         JScrollPane scrollChat = new JScrollPane(tfChat);
         panelCenter.add(scrollChat);
         add(panelCenter, BorderLayout.CENTER);
+    }
 
+    private void createBottom(){
+        setMessageSetting();
         panelBottom.add(tfMessage, BorderLayout.CENTER);
         btnSend.setEnabled(false);
         panelBottom.add(btnSend, BorderLayout.EAST);
         add(panelBottom, BorderLayout.SOUTH);
     }
 
-    private void sendLogToServer(String mes){
-        String result = login + COLON + SPASE + mes + NEW_STR;
-        server.message(result);
-        tfChat.setText(server.getLogInfo());
+    private void setMessageSetting(){
+        tfMessage.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == '\n') {
+                    sendMessage();
+                }
+            }
+        });
     }
 
     private void setBtnSettings(){
@@ -110,39 +123,46 @@ public class ClientGUI extends JFrame{
         });
     }
 
-    public void answer(String text) {
-        server.setTextLog(text);
-    }
-
     private void sendMessage(){
-        message = tfMessage.getText();
-        sendLogToServer(message);
+        clientController.message(tfMessage.getText());
         tfMessage.setText(EMPTY_STR);
     }
 
     private void connectToServer() {
-        if (server.connectUser(this)){
-            login = tfLogin.getText();
-            sendLogToServer(LOGIN_SUCCESS);
+        if (clientController.connectToServer(tfLogin.getText())) {
+            panelTop.setVisible(false);
+            login_name = tfLogin.getText();
             btnSend.setEnabled(true);
             btnLogin.setEnabled(false);
-            panelTop.setVisible(false);
-            connected = true;
-            String log = server.getLog();
-            if (EMPTY_STR.equals(log)) {
-                tfChat.setText(log);
-            }
-        } else {
-            sendLogToServer(SERVER_ERROR);
         }
     }
 
-    public void disconnectFromServer() {
-        if (connected) {
-            panelTop.setVisible(true);
-            connected = false;
-            server.disconnectUser(this);
-            sendLogToServer(SERVER_DISCONNECT);
+
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
+        if (e.getID() == WindowEvent.WINDOW_CLOSING){
+            disconnectServer();
+        }
+    }
+
+    public void hidePanelTop(boolean visible){
+        panelTop.setVisible(visible);
+    }
+
+    public void disconnectServer(){
+        clientController.disconnectServer();
+    }
+
+    private void setIPInfo(){
+        try {
+            final DatagramSocket socket = new DatagramSocket();
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            ipAdress = socket.getLocalAddress().toString();
+            port = String.valueOf(socket.getPort());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
